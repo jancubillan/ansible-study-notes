@@ -1,0 +1,61 @@
+---
+# tasks file for sample-mysql
+  - parted:
+      device: /dev/vdb
+      number: 1
+      state: present
+      part_end: 800MB
+
+  - lvg:
+      vg: vg_database
+      pvs: /dev/vdb1
+
+  - lvol:
+      vg: vg_database
+      lv: lv_mysql
+      size: 512M
+
+  - filesystem:
+      fstype: xfs
+      dev: /dev/vg_database/lv_mysql
+
+  - file:
+      path: /mnt/mysql_backups
+      state: directory
+
+  - mount:
+      path: /mnt/mysql_backups
+      src: /dev/vg_database/lv_mysql
+      fstype: xfs
+      opts: defaults
+      state: mounted
+
+  - yum:
+      name: mysql-community-server
+      state: latest
+
+  - firewalld:
+      port: 3306/tcp
+      permanent: yes
+      state: enabled
+      immediate: yes 
+ 
+  - service:
+      name: mysqld 
+      state: started
+      enabled: yes
+
+  - mysql_user:
+      check_implicit_admin: yes
+      login_user: root
+      login_password: "{{ database_password }}"
+      name: root
+      password: "{{ database_password }}"
+
+  - template:
+      src: my.cnf.j2
+      dest: /etc/my.cnf
+      owner: mysql
+      group: mysql
+      mode: '0644'
+    notify: restart mysql

@@ -1,0 +1,62 @@
+---
+- hosts: webservers
+  become: yes
+  vars_files:
+  - /home/automation/plays/secret.yml
+  - /home/automation/plays/vars/user_list.yml
+  tasks:
+  - name: users whose user id starts with 1
+    user: 
+      name: "{{ item.username }}"
+      uid: "{{ item.uid }}"
+      password: "{{ user_password | password_hash('sha512') }}"
+      update_password: on_create
+      groups: wheel
+      append: yes
+      shell: /bin/bash
+      state: present
+    loop: "{{ users }}"
+    when: item.uid is regex('^1.*')
+    tags:
+    - primary
+
+  - name: upload ssh key
+    authorized_key:
+      user: "{{ item.username }}"
+      state: present
+      key: "{{ lookup('file', '/home/automation/.ssh/id_rsa.pub') }}"
+    loop: "{{ users }}"
+    when: item.uid is regex('^1.*')
+    tags:
+    - secondary
+
+- hosts: database
+  become: yes
+  vars_files:
+  - /home/automation/plays/secret.yml
+  - /home/automation/plays/vars/user_list.yml
+  tasks:
+  - name: users whose user id starts with 2
+    user:
+      name: "{{ item.username }}"
+      uid: "{{ item.uid }}"
+      password: "{{ user_password | password_hash('sha512') }}"
+      update_password: on_create
+      groups: wheel
+      append: yes
+      shell: /bin/bash
+      state: present
+    loop: "{{ users }}"
+    when: item.uid is regex('^2.*')
+    tags:
+    - primary
+
+  - name: upload ssh key
+    authorized_key:
+      user: "{{ item.username }}"
+      state: present
+      key: "{{ lookup('file', '/home/automation/.ssh/id_rsa.pub') }}"
+    loop: "{{ users }}"
+    when: item.uid is regex('^2.*')
+    tags:
+    - secondary

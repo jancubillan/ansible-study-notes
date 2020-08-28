@@ -1,0 +1,21 @@
+---
+- hosts: database
+  become: yes
+  tasks:
+  - file: 
+      path: /etc/ansible/facts.d
+      state: directory
+      recurse: yes
+
+  - copy:
+      dest: /etc/ansible/facts.d/custom.fact
+      content: |
+        [sample_exam]
+        server_role=mysql
+
+  - setup: 
+      filter: ansible_local
+
+  - debug:
+      msg: "{{ ansible_local.custom.sample_exam }}"
+

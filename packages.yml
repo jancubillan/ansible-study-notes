@@ -1,0 +1,17 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+  - yum:
+      name:
+      - tcpdump
+      - mailx
+      state: latest
+    when: inventory_hostname in groups['proxy']
+
+  - yum:
+      name:
+      - lsof
+      - mailx
+      state: latest
+    when: inventory_hostname in groups['database']

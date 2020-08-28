@@ -1,0 +1,10 @@
+---
+- hosts: proxy
+  become: yes
+  tasks:
+  - name: hourly task for root
+    cron:
+      name: "hourly task for root"
+      user: root
+      special_time: hourly
+      job: "date >> /var/log/time.log"

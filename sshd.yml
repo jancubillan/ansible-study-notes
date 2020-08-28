@@ -1,0 +1,30 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+  - name: banner set to /etc/motd
+    lineinfile:
+      path: /etc/ssh/sshd_config
+      regexp: '^#Banner'
+      line: Banner /etc/motd
+    notify: restart sshd
+
+  - name: X11Forwarding is disabled
+    lineinfile:
+      path: /etc/ssh/sshd_config
+      regexp: '^X11Forwarding'
+      line: X11Forwarding no
+    notify: restart sshd
+
+  - name: MaxAuthTries is set to 3
+    lineinfile:
+      path: /etc/ssh/sshd_config
+      regexp: '^#MaxAuthTries'
+      line: MaxAuthTries 3
+    notify: restart sshd
+
+  handlers:
+  - name: restart sshd
+    service:
+      name: sshd
+      state: restarted
