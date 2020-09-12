@@ -1,21 +1,22 @@
 ---
 - hosts: database
-  become: yes
   tasks:
-  - file: 
+  - file:
       path: /etc/ansible/facts.d
       state: directory
-      recurse: yes
-
-  - copy:
-      dest: /etc/ansible/facts.d/custom.fact
-      content: |
+      mode: '0755'
+    become: yes
+  - blockinfile:
+      path: /etc/ansible/facts.d/custom.fact
+      block: |
         [sample_exam]
         server_role=mysql
-
-  - setup: 
+      create: yes
+      owner: root
+      group: root
+      mode: '0644'
+    become: yes
+  - setup:
       filter: ansible_local
-
   - debug:
-      msg: "{{ ansible_local.custom.sample_exam }}"
-
+      var: ansible_local.custom.sample_exam

@@ -1,62 +1,28 @@
 ---
-- hosts: webservers
-  become: yes
+- hosts: all
   vars_files:
   - /home/automation/plays/secret.yml
   - /home/automation/plays/vars/user_list.yml
   tasks:
-  - name: users whose user id starts with 1
-    user: 
+  - user:
       name: "{{ item.username }}"
-      uid: "{{ item.uid }}"
       password: "{{ user_password | password_hash('sha512') }}"
-      update_password: on_create
+      uid: "{{ item.uid }}"
       groups: wheel
       append: yes
       shell: /bin/bash
-      state: present
+      update_password: on_create
     loop: "{{ users }}"
-    when: item.uid is regex('^1.*')
-    tags:
-    - primary
+    when: (item.uid is regex('^1.*') and inventory_hostname in groups['webservers']) or (item.uid is regex('^2.*') and inventory_hostname in groups['database'])
+    become: yes
+    notify: upload ssh key       
 
+  handlers:
   - name: upload ssh key
     authorized_key:
       user: "{{ item.username }}"
       state: present
       key: "{{ lookup('file', '/home/automation/.ssh/id_rsa.pub') }}"
     loop: "{{ users }}"
-    when: item.uid is regex('^1.*')
-    tags:
-    - secondary
-
-- hosts: database
-  become: yes
-  vars_files:
-  - /home/automation/plays/secret.yml
-  - /home/automation/plays/vars/user_list.yml
-  tasks:
-  - name: users whose user id starts with 2
-    user:
-      name: "{{ item.username }}"
-      uid: "{{ item.uid }}"
-      password: "{{ user_password | password_hash('sha512') }}"
-      update_password: on_create
-      groups: wheel
-      append: yes
-      shell: /bin/bash
-      state: present
-    loop: "{{ users }}"
-    when: item.uid is regex('^2.*')
-    tags:
-    - primary
-
-  - name: upload ssh key
-    authorized_key:
-      user: "{{ item.username }}"
-      state: present
-      key: "{{ lookup('file', '/home/automation/.ssh/id_rsa.pub') }}"
-    loop: "{{ users }}"
-    when: item.uid is regex('^2.*')
-    tags:
-    - secondary
+    when: (item.uid is regex('^1.*') and inventory_hostname in groups['webservers']) or (item.uid is regex('^2.*') and inventory_hostname in groups['database'])
+    become: yes

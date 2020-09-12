@@ -1,6 +1,2 @@
 ---
 # handlers file for sample-mysql
-  - name: restart mysql
-    service:
-      name: mysqld
-      state: restarted

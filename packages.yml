@@ -1,6 +1,5 @@
 ---
 - hosts: all
-  become: yes
   tasks:
   - yum:
       name:
@@ -8,10 +7,11 @@
       - mailx
       state: latest
     when: inventory_hostname in groups['proxy']
-
+    become: yes
   - yum:
-      name:
+      name: 
       - lsof
       - mailx
       state: latest
     when: inventory_hostname in groups['database']
+    become: yes

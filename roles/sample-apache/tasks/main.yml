@@ -1,30 +1,30 @@
 ---
-# tasks file for sample-apache
-  - yum:
-      name:
-      - httpd
-      - mod_ssl
-      - php
-      state: latest
+# tasks file for roles/sample-apache
+- yum:
+    name:
+    - httpd
+    - mod_ssl
+    - php
+    state: present
 
-  - service:
-      name: httpd
-      state: started
-      enabled: yes
+- service:
+    name: httpd
+    state: started
+    enabled: yes
 
-  - firewalld:
-      port: "{{ item }}"
-      permanent: yes
-      immediate: yes
-      state: enabled
-    loop:
-    - 80/tcp
-    - 443/tcp
+- firewalld:
+    port: "{{ item }}"
+    permanent: yes
+    immediate: yes
+    state: enabled
+  loop:
+  - 80/tcp
+  - 443/tcp
 
-  - template:
-      src: index.html.j2
-      dest: /var/www/html/index.html
-      owner: apache
-      group: apache
-      mode: '0644'
-    notify: restart httpd
+- template:
+    src: index.html.j2
+    dest: /var/www/html/index.html
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart apache

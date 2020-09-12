@@ -3,8 +3,7 @@ selinux_state: null
 selinux_policy: null
 
 # Set up empty lists for SELinux changes.
-selinux_booleans:
-  - { name: 'httpd_can_network_connect', state: 'on', persistent: 'yes' }
+selinux_booleans: []
 selinux_fcontexts: []
 selinux_logins: []
 selinux_ports: []
